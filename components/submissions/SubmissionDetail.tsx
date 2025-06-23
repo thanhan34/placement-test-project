@@ -1,6 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
-import { Timestamp } from 'firebase/firestore';
 import { Submission, Question } from '../../types/placement-test';
 import NotesEditor from './NotesEditor';
 import AnswerCard from './AnswerCard';
@@ -48,22 +46,23 @@ const SubmissionDetail: React.FC<SubmissionDetailProps> = ({
     );
   }
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: unknown) => {
     try {
       // Check if it's a Firestore Timestamp object
-      if (timestamp && typeof timestamp.toDate === 'function') {
+      if (timestamp && typeof (timestamp as { toDate?: () => Date }).toDate === 'function') {
         return new Intl.DateTimeFormat('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
           hour: '2-digit',
           minute: '2-digit'
-        }).format(timestamp.toDate());
+        }).format((timestamp as { toDate: () => Date }).toDate());
       }
       
       // Check if it's our serialized timestamp format
-      if (timestamp && timestamp._isTimestamp) {
-        const date = new Date(timestamp._seconds * 1000);
+      if (timestamp && (timestamp as { _isTimestamp?: boolean })._isTimestamp) {
+        const timestampObj = timestamp as { _seconds: number };
+        const date = new Date(timestampObj._seconds * 1000);
         return new Intl.DateTimeFormat('en-US', {
           year: 'numeric',
           month: 'long',
@@ -151,19 +150,19 @@ const SubmissionDetail: React.FC<SubmissionDetailProps> = ({
             <div className="text-[#FFFFFF] space-y-2">
               <ScoreSummary 
                 label="Reading Writing Fill In The Blank" 
-                score={calculateRWFIBScore(submission, questions)} 
+                score={calculateRWFIBScore(submission)} 
               />
               <ScoreSummary 
                 label="Reading Fill In The Blank" 
-                score={calculateRFIBScore(submission, questions)} 
+                score={calculateRFIBScore(submission)} 
               />
               <ScoreSummary 
                 label="Write From Dictation" 
                 score={calculateWFDScore(submission, questions)} 
               />
               {(() => {
-                const rwfibScore = calculateRWFIBScore(submission, questions);
-                const rfibScore = calculateRFIBScore(submission, questions);
+                const rwfibScore = calculateRWFIBScore(submission);
+                const rfibScore = calculateRFIBScore(submission);
                 const wfdScore = calculateWFDScore(submission, questions);
                 return (
                   <ScoreSummary 

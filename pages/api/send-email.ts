@@ -84,26 +84,31 @@ Submission Time: ${new Date(submission.timestamp.toDate()).toLocaleString()}
       return res.status(200).json({ 
         message: 'Email sent successfully'
       });
-    } catch (sendError: any) {
+    } catch (sendError: unknown) {
+      const errorMessage = sendError instanceof Error ? sendError.message : 'Unknown error';
+      const errorCode = (sendError as { code?: string })?.code;
+      const responseBody = (sendError as { response?: { body?: unknown } })?.response?.body;
+      
       console.error('SendGrid Error Details:', {
-        message: sendError.message,
-        code: sendError.code,
-        response: sendError.response?.body
+        message: errorMessage,
+        code: errorCode,
+        response: responseBody
       });
       
       // Return detailed error for debugging
       return res.status(500).json({
         message: 'Email sending failed',
-        error: sendError.message,
-        code: sendError.code,
-        details: sendError.response?.body
+        error: errorMessage,
+        code: errorCode,
+        details: responseBody
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error in email handler:', error);
     return res.status(500).json({ 
       message: 'Failed to send email',
-      error: error.message
+      error: errorMessage
     });
   }
 }

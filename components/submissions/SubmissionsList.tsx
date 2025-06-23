@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Timestamp } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
 import { Submission } from '../../types/placement-test';
 import Link from 'next/link';
 
@@ -39,22 +38,23 @@ const SubmissionsList: React.FC<SubmissionsListProps> = ({
     onSearchChange(debouncedSearchTerm);
   }, [debouncedSearchTerm, onSearchChange]);
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp: unknown) => {
     try {
       // Check if it's a Firestore Timestamp object
-      if (timestamp && typeof timestamp.toDate === 'function') {
+      if (timestamp && typeof (timestamp as { toDate?: () => Date }).toDate === 'function') {
         return new Intl.DateTimeFormat('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
           hour: '2-digit',
           minute: '2-digit'
-        }).format(timestamp.toDate());
+        }).format((timestamp as { toDate: () => Date }).toDate());
       }
       
       // Check if it's our serialized timestamp format
-      if (timestamp && timestamp._isTimestamp) {
-        const date = new Date(timestamp._seconds * 1000);
+      if (timestamp && (timestamp as { _isTimestamp?: boolean })._isTimestamp) {
+        const timestampObj = timestamp as { _seconds: number };
+        const date = new Date(timestampObj._seconds * 1000);
         return new Intl.DateTimeFormat('en-US', {
           year: 'numeric',
           month: 'long',
@@ -76,8 +76,9 @@ const SubmissionsList: React.FC<SubmissionsListProps> = ({
       }
       
       // If it's a plain object with seconds
-      if (timestamp && typeof timestamp.seconds === 'number') {
-        const date = new Date(timestamp.seconds * 1000);
+      if (timestamp && typeof (timestamp as { seconds?: number }).seconds === 'number') {
+        const timestampObj = timestamp as { seconds: number };
+        const date = new Date(timestampObj.seconds * 1000);
         return new Intl.DateTimeFormat('en-US', {
           year: 'numeric',
           month: 'long',

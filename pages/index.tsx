@@ -4,7 +4,7 @@ import { db, storage } from '../firebase';
 import { collection, addDoc, doc } from 'firebase/firestore';
 import { fetchQuestions } from '../services/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Question, PersonalInfo, WFDQuestion as WFDQuestionType, Answer } from '../types/placement-test';
+import { Question, PersonalInfo, Answer } from '../types/placement-test';
 import PersonalInfoForm from '../components/placement-test/PersonalInfo';
 import QuestionProgress from '../components/placement-test/QuestionProgress';
 import { getRandomItems } from '../utils/questionUtils';
@@ -47,7 +47,6 @@ const PlacementTest: React.FC = () => {
     target: '',
   });
   const router = useRouter();
-  const mounted = useRef(true);
   const audioChunksRef = useRef<BlobPart[]>([]);
   const processingRecordingRef = useRef<Promise<void> | null>(null);
 
@@ -181,7 +180,7 @@ const PlacementTest: React.FC = () => {
           const filename = `placement_test_ra_${currentQuestion.questionNumber}_${timestamp}${mimeType.includes('webm') ? '.webm' : mimeType.includes('mp4') ? '.mp4' : '.ogg'}`;
           const storageRef = ref(storage, `placement_test_recordings/${filename}`);
           
-          const uploadTask = await uploadBytes(storageRef, audioBlob);
+          await uploadBytes(storageRef, audioBlob);
           const downloadUrl = await getDownloadURL(storageRef);
 
           setUserAnswers(prev => ({
@@ -294,7 +293,7 @@ const PlacementTest: React.FC = () => {
     setUserAnswers(prev => {
       const newAnswers = { ...prev };
       Object.entries(newAnswers).forEach(([key, existingValue]) => {
-        const [questionId, position] = key.split('_');
+        const [questionId] = key.split('_');
         if (questionId === currentQuestion.id && existingValue === value) {
           delete newAnswers[key];
         }

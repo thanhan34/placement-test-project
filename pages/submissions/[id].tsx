@@ -6,7 +6,7 @@ import { GetServerSideProps } from 'next';
 import { db, storage } from '../../firebase';
 import { doc, getDoc, collection, getDocs, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
-import { PersonalInfo, Answer, Question, Submission } from '../../types/placement-test';
+import { Question, Submission } from '../../types/placement-test';
 import SubmissionDetail from '../../components/submissions/SubmissionDetail';
 import Link from 'next/link';
 
@@ -22,21 +22,18 @@ interface SubmissionPageProps {
 
 export default function SubmissionPage({ initialSubmission, initialQuestions, error: initialError }: SubmissionPageProps) {
   const router = useRouter();
-  const { id } = router.query;
   
   // Reconstruct Timestamp objects from serialized data
   const [submission, setSubmission] = useState<Submission | null>(() => 
     initialSubmission ? reconstructTimestamps(initialSubmission) as Submission : null
   );
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(initialError);
+  const [error] = useState<string | null>(initialError);
   const [editingNotes, setEditingNotes] = useState<string | null>(null);
-  const [tempNotes, setTempNotes] = useState('');
   const [deleting, setDeleting] = useState<string | null>(null);
   const [audioUrls, setAudioUrls] = useState<AudioUrls>({});
   const [loadingAudio, setLoadingAudio] = useState<Record<string, boolean>>({});
   const [audioErrors, setAudioErrors] = useState<Record<string, string>>({});
-  const [questions, setQuestions] = useState<Record<string, Question>>(() => 
+  const [questions] = useState<Record<string, Question>>(() => 
     reconstructTimestamps(initialQuestions) as Record<string, Question>
   );
 
@@ -141,7 +138,6 @@ export default function SubmissionPage({ initialSubmission, initialQuestions, er
         prev?.id === submissionId ? { ...prev, notes } : prev
       );
       setEditingNotes(null);
-      setTempNotes('');
     } catch (error) {
       console.error('Error saving notes:', error);
       alert('Failed to save notes. Please try again.');
@@ -164,17 +160,6 @@ export default function SubmissionPage({ initialSubmission, initialQuestions, er
       setDeleting(null);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#232323] flex flex-col items-center justify-center p-4">
-        <div className="mb-6 sm:mb-8">
-          <Image src="/logo1.png" alt="Logo" width={120} height={120} className="w-[100px] h-[100px] sm:w-[150px] sm:h-[150px]" priority />
-        </div>
-        <div className="text-[#fc5d01] text-center">Loading submission...</div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -220,13 +205,11 @@ export default function SubmissionPage({ initialSubmission, initialQuestions, er
             loadingAudio={loadingAudio}
             audioErrors={audioErrors}
             onSaveNotes={saveNotes}
-            onStartEditNotes={(id, notes) => {
+            onStartEditNotes={(id) => {
               setEditingNotes(id);
-              setTempNotes(notes);
             }}
             onCancelEditNotes={() => {
               setEditingNotes(null);
-              setTempNotes('');
             }}
             onDeleteSubmission={deleteSubmission}
             onRetryAudio={retryAudioUrl}
@@ -238,7 +221,7 @@ export default function SubmissionPage({ initialSubmission, initialQuestions, er
 }
 
 // Helper function to convert Firestore timestamps to serializable objects and handle undefined values
-const convertTimestamps = (obj: any): any => {
+const convertTimestamps = (obj: unknown): unknown => {
   if (obj === undefined) {
     return null;
   }
@@ -263,31 +246,32 @@ const convertTimestamps = (obj: any): any => {
     return obj.map(item => convertTimestamps(item));
   }
 
-  const result: any = {};
+  const result: Record<string, unknown> = {};
   Object.keys(obj).forEach(key => {
-    result[key] = convertTimestamps(obj[key]);
+    result[key] = convertTimestamps((obj as Record<string, unknown>)[key]);
   });
 
   return result;
 };
 
 // Helper function to reconstruct Timestamps on the client
-export const reconstructTimestamps = (obj: any): any => {
+export const reconstructTimestamps = (obj: unknown): unknown => {
   if (obj === null || obj === undefined || typeof obj !== 'object') {
     return obj;
   }
 
-  if (obj._isTimestamp) {
-    return new Timestamp(obj._seconds, obj._nanoseconds);
+  if ((obj as { _isTimestamp?: boolean })._isTimestamp) {
+    const timestampObj = obj as { _seconds: number; _nanoseconds: number };
+    return new Timestamp(timestampObj._seconds, timestampObj._nanoseconds);
   }
 
   if (Array.isArray(obj)) {
     return obj.map(item => reconstructTimestamps(item));
   }
 
-  const result: any = {};
+  const result: Record<string, unknown> = {};
   Object.keys(obj).forEach(key => {
-    result[key] = reconstructTimestamps(obj[key]);
+    result[key] = reconstructTimestamps((obj as Record<string, unknown>)[key]);
   });
 
   return result;
@@ -321,7 +305,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const answersSnapshot = await getDocs(answersQuery);
     
     // Initialize answers object with empty answers for all question numbers
-    const answers: Record<string, any> = {};
+    const answers: Record<string, unknown> = {};
     for (let i = 1; i <= 12; i++) {
       answers[i.toString()] = {
         questionNumber: i,
@@ -353,7 +337,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // Fetch questions
     const questionsSnapshot = await getDocs(collection(db, 'questions'));
     
-    const questionsData: Record<string, any> = {};
+    const questionsData: Record<string, unknown> = {};
     
     questionsSnapshot.docs.forEach(doc => {
       const data = doc.data();

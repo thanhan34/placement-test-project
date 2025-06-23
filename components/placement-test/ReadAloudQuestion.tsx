@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import Timer from "./Timer";
+import React from "react";
 
 interface ReadAloudQuestionProps {
   content: string;
@@ -16,12 +15,10 @@ interface ReadAloudQuestionProps {
 
 const ReadAloudQuestion: React.FC<ReadAloudQuestionProps> = ({
   content,
-  timer,
   isPrepping,
   prepTimer,
   isRecordingPhase,
   recordTimer,
-  isRecording,
   userAnswer,
   onNext,
   isLastQuestion,

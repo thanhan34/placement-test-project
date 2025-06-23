@@ -3,8 +3,8 @@ import Image from 'next/image';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import { db } from '../firebase';
-import { collection, getDocs, query, orderBy, limit, startAfter, Timestamp, DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
-import { Submission, Question } from '../types/placement-test';
+import { collection, getDocs, query, orderBy, limit, startAfter, DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
+import { Submission } from '../types/placement-test';
 import SubmissionsList from '../components/submissions/SubmissionsList';
 
 // Number of submissions to load per page
@@ -19,9 +19,8 @@ interface SubmissionsIndexProps {
 export default function SubmissionsIndex({ initialSubmissions, hasMore: initialHasMore }: SubmissionsIndexProps) {
   const [submissions, setSubmissions] = useState<Submission[]>(initialSubmissions);
   const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>(initialSubmissions);
-  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [lastVisible, setLastVisible] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -170,7 +169,7 @@ export default function SubmissionsIndex({ initialSubmissions, hasMore: initialH
 }
 
 // Helper function to handle undefined values for serialization
-const serializeData = (obj: any): any => {
+const serializeData = (obj: unknown): unknown => {
   if (obj === undefined) {
     return null;
   }
@@ -187,9 +186,9 @@ const serializeData = (obj: any): any => {
     return obj.map(item => serializeData(item));
   }
   
-  const result: any = {};
+  const result: Record<string, unknown> = {};
   Object.keys(obj).forEach(key => {
-    result[key] = serializeData(obj[key]);
+    result[key] = serializeData((obj as Record<string, unknown>)[key]);
   });
   
   return result;

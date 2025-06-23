@@ -28,9 +28,10 @@ export default function TestComplete() {
 
         console.log('Email notification sent successfully:', data);
         setEmailStatus('Email notification sent successfully');
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         console.error('Error sending email notification:', error);
-        setEmailStatus(`Error: ${error?.message || 'Unknown error occurred'}`);
+        setEmailStatus(`Error: ${errorMessage}`);
       }
     };
 

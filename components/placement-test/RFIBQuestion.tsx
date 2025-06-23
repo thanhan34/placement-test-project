@@ -1,5 +1,4 @@
 import React from 'react';
-import Timer from './Timer';
 
 interface RFIBQuestionProps {
   content: string;
@@ -13,7 +12,6 @@ interface RFIBQuestionProps {
 
 const RFIBQuestion: React.FC<RFIBQuestionProps> = ({
   content,
-  timer,
   availableOptions,
   userAnswers,
   onDrop,

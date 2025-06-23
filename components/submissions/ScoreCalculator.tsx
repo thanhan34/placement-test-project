@@ -7,8 +7,7 @@ interface QuestionScore {
 }
 
 export const calculateRWFIBScore = (
-  submission: Submission,
-  questions: Record<string, Question>
+  submission: Submission
 ): QuestionScore => {
   let totalCorrect = 0;
   let total = 0;
@@ -33,8 +32,7 @@ export const calculateRWFIBScore = (
 };
 
 export const calculateRFIBScore = (
-  submission: Submission,
-  questions: Record<string, Question>
+  submission: Submission
 ): QuestionScore => {
   let totalCorrect = 0;
   let total = 0;
