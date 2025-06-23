@@ -64,7 +64,7 @@ Submission Time: ${new Date(submission.timestamp.toDate()).toLocaleString()}
             <p><strong>Phone:</strong> ${personalInfo.phone}</p>
             <p><strong>Target Score:</strong> ${personalInfo.target}</p>
             <p><strong>Submission Time:</strong> ${new Date(submission.timestamp.toDate()).toLocaleString()}</p>
-            <p>Truy cập vào đường link sau để xem chi tiết: https://study.pteintensive.com/submissions</p>
+            <p>Truy cập vào đường link sau để xem chi tiết: https://placementtest.pteintensive.com/submissions</p>
             <P>PTE Intensive Team</P>
           </div>
         </div>
