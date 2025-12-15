@@ -12,22 +12,37 @@ export default async function handler(
 
   try {
     const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+    console.log('Discord webhook URL exists:', !!webhookUrl);
+    
     if (!webhookUrl) {
-      throw new Error('DISCORD_WEBHOOK_URL is not set in environment variables');
+      console.error('DISCORD_WEBHOOK_URL is not set in environment variables');
+      return res.status(500).json({ 
+        message: 'Discord webhook URL is not configured',
+        error: 'DISCORD_WEBHOOK_URL environment variable is missing'
+      });
     }
 
     // Get the latest submission
+    console.log('Fetching latest submission from Firebase...');
     const submissionsRef = collection(db, 'submissions');
     const q = query(submissionsRef, orderBy('timestamp', 'desc'), limit(1));
     const querySnapshot = await getDocs(q);
     
     if (querySnapshot.empty) {
+      console.error('No submissions found in database');
       return res.status(404).json({ message: 'No submission found' });
     }
 
     const submission = querySnapshot.docs[0].data();
     const submissionId = querySnapshot.docs[0].id;
+    console.log('Found submission:', submissionId);
+    
     const { personalInfo } = submission;
+    
+    if (!personalInfo) {
+      console.error('Personal info is missing from submission');
+      return res.status(400).json({ message: 'Invalid submission data' });
+    }
 
     // Format timestamp
     const submissionTime = new Date(submission.timestamp.toDate()).toLocaleString('en-US', {
