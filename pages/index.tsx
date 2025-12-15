@@ -424,6 +424,15 @@ const PlacementTest: React.FC = () => {
         });
       }
       
+      // Send Discord notification
+      try {
+        await fetch('/api/send-discord', { method: 'POST' });
+        console.log('Discord notification sent');
+      } catch (notificationError) {
+        console.error('Error sending Discord notification:', notificationError);
+        // Don't block the user flow if notification fails
+      }
+      
       router.push('/test-complete');
     } catch (error) {
       console.error('Error submitting test:', error);

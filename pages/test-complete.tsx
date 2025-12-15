@@ -4,14 +4,14 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 
 export default function TestComplete() {
-  const [emailStatus, setEmailStatus] = useState<string>('');
+  const [notificationStatus, setNotificationStatus] = useState<string>('');
 
   useEffect(() => {
-    // Send email notification when page loads
-    const sendEmailNotification = async () => {
+    // Send Discord notification when page loads
+    const sendDiscordNotification = async () => {
       try {
-        console.log('Sending email notification...');
-        const response = await fetch('/api/send-email', {
+        console.log('Sending Discord notification...');
+        const response = await fetch('/api/send-discord', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -21,21 +21,21 @@ export default function TestComplete() {
         const data = await response.json();
 
         if (!response.ok) {
-          console.error('Failed to send email notification:', data);
-          setEmailStatus('Failed to send email notification');
-          throw new Error(data.message || 'Failed to send email');
+          console.error('Failed to send Discord notification:', data);
+          setNotificationStatus('Failed to send Discord notification');
+          throw new Error(data.message || 'Failed to send notification');
         }
 
-        console.log('Email notification sent successfully:', data);
-        setEmailStatus('Email notification sent successfully');
+        console.log('Discord notification sent successfully:', data);
+        setNotificationStatus('Discord notification sent successfully');
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        console.error('Error sending email notification:', error);
-        setEmailStatus(`Error: ${errorMessage}`);
+        console.error('Error sending Discord notification:', error);
+        setNotificationStatus(`Error: ${errorMessage}`);
       }
     };
 
-    sendEmailNotification();
+    sendDiscordNotification();
   }, []);
 
   return (
@@ -82,9 +82,9 @@ export default function TestComplete() {
           <p className="mt-2 text-center text-sm text-gray-500">
             We will review your test and get back to you with the results soon.
           </p>
-          {emailStatus && (
-            <p className={`mt-2 text-center text-sm ${emailStatus.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>
-              {emailStatus}
+          {notificationStatus && (
+            <p className={`mt-2 text-center text-sm ${notificationStatus.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>
+              {notificationStatus}
             </p>
           )}
 
