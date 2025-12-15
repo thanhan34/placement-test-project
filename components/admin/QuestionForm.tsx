@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { QuestionType } from '../../types/placement-test';
+import { QuestionType, Question } from '../../types/placement-test';
 
 interface QuestionFormProps {
-  onSubmit: (questionData: any) => void;
+  onSubmit: (questionData: Omit<Question, 'id'>) => void;
   loading: boolean;
 }
 
@@ -17,12 +17,12 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ onSubmit, loading }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const questionData: any = {
+    const questionData: Omit<Question, 'id'> = {
       type: questionType,
       content: content.trim(),
       difficulty,
       taskNumber: taskNumber.trim() || undefined,
-    };
+    } as Omit<Question, 'id'>;
 
     // Add type-specific fields
     if (questionType === 'rwfib' || questionType === 'rfib') {
@@ -31,10 +31,10 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ onSubmit, loading }) => {
       const filteredCorrectAnswers = correctAnswers.filter(ans => ans.trim() !== '');
       
       if (filteredOptions.length > 0) {
-        questionData.options = filteredOptions;
+        (questionData as { options?: string[] }).options = filteredOptions;
       }
       if (filteredCorrectAnswers.length > 0) {
-        questionData.correctAnswers = filteredCorrectAnswers;
+        (questionData as { correctAnswers?: string[] }).correctAnswers = filteredCorrectAnswers;
       }
     }
 

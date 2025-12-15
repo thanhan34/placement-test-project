@@ -41,7 +41,7 @@ const AdminPage: React.FC = () => {
     }
   };
 
-  const handleSubmitQuestion = async (questionData: any) => {
+  const handleSubmitQuestion = async (questionData: Omit<Question, 'id'>) => {
     try {
       setSubmitting(true);
       setMessage(null);
